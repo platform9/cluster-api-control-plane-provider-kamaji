@@ -52,6 +52,8 @@ func (r *KamajiControlPlaneReconciler) patchCluster(ctx context.Context, cluster
 		return r.checkOrPatchGenericCluster(ctx, cluster, endpoint, port)
 	case "VSphereCluster":
 		return r.checkOrPatchGenericCluster(ctx, cluster, endpoint, port)
+	case "SpotCluster":
+		return r.patchGenericCluster(ctx, cluster, endpoint, port, false)
 	default:
 		return errors.New("unsupported infrastructure provider")
 	}
