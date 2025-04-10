@@ -98,6 +98,12 @@ jobs:
         run: |
           trivy fs --scanners vuln --vuln-type library --format json -o trivy-report.json .
 
+      - name: Upload Trivy Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
+
       - name: Show Trivy Report in Logs
         run: cat trivy-report.json
 
