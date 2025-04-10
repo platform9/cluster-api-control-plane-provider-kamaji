@@ -132,27 +132,28 @@ jobs:
           path: tmp
 
       - name: Generate PR Body with High/Critical Trivy Results
-          run: |
-            echo "# 🚨 Trivy Vulnerability Report (High/Critical)" > tmp/pr-body.md
-            jq -r '
-              .Results[]
-              | select(.Vulnerabilities != null)
-              | .Target as $target
-              | .Vulnerabilities[]
-              | select(.Severity == "HIGH" or .Severity == "CRITICAL")
-              | "* Target: \($target)
-                  • Package: \(.PkgName)
-                  • Severity: \(.Severity)
-                  • Title: \(.Title)
-                  • Description: \(.Description // "N/A")
-                  • Installed Version: \(.InstalledVersion)
-                  • Fixed Version: \(.FixedVersion // "N/A")
-                  • CWE: \(.CweIDs | join(", ") // "N/A")
-                  • CVE: \(.VulnerabilityID)
-                  • References: \(.PrimaryURL // "N/A")
-                "
-            ' tmp/trivy-report.json >> tmp/pr-body.md || echo "❌ No critical/high vulnerabilities found in report." >> tmp/pr-body.md
-        
+        run: |
+          echo "# 🚨 Trivy Vulnerability Report (High/Critical)" > tmp/pr-body.md
+          jq -r '
+            .Results[]
+            | select(.Vulnerabilities != null)
+            | .Target as $target
+            | .Vulnerabilities[]
+            | select(.Severity == "HIGH" or .Severity == "CRITICAL")
+            | "* Target: \($target)
+                • Package: \(.PkgName)
+                • Severity: \(.Severity)
+                • Title: \(.Title)
+                • Description: \(.Description // "N/A")
+                • Installed Version: \(.InstalledVersion)
+                • Fixed Version: \(.FixedVersion // "N/A")
+                • CWE: \(.CweIDs | join(", ") // "N/A")
+                • CVE: \(.VulnerabilityID)
+                • References: \(.PrimaryURL // "N/A")
+              "
+          ' tmp/trivy-report.json >> tmp/pr-body.md || echo "❌ No critical/high vulnerabilities found in report." >> tmp/pr-body.md
+      
+      
       - name: Add Trivy Alert Log (Optional)
         run: |
           jq -r '
