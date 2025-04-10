@@ -125,10 +125,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Download Trivy Report
-        run: |
-          mkdir -p tmp
-          cp trivy-report.json tmp/trivy-report.json
+      - name: Download Trivy Report Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: trivy-report
+          path: tmp
 
       - name: Generate PR Body with High/Critical Trivy Results
         run: |
