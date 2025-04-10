@@ -119,21 +119,44 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Add dummy file for PR
+      - name: Download Trivy Report
         run: |
-          echo "High vulnerabilities found at $(date)" >> .security-alert.log
+          mkdir -p tmp
+          cp trivy-report.json tmp/trivy-report.json
+
+      - name: Generate PR Body with High/Critical Trivy Results
+        run: |
+          echo "# 🚨 Trivy Vulnerability Report (High/Critical)" > tmp/pr-body.md
+          jq -r '
+            .Results[]
+            | select(.Vulnerabilities != null)
+            | .Target as $target
+            | .Vulnerabilities[]
+            | select(.Severity == "HIGH" or .Severity == "CRITICAL")
+            | "* Target: \($target)\n  • Package: \(.PkgName)\n  • Severity: \(.Severity)\n  • Title: \(.Title)\n  • Installed Version: \(.InstalledVersion)\n  • Fixed Version: \(.FixedVersion)\n  • CVE: \(.VulnerabilityID)\n"
+          ' tmp/trivy-report.json >> tmp/pr-body.md || echo "❌ No critical/high vulnerabilities found in report." >> tmp/pr-body.md
+
+      - name: Add Trivy Alert Log (Optional)
+        run: |
+          jq -r '
+            .Results[]
+            | select(.Vulnerabilities != null)
+            | .Vulnerabilities[]
+            | select(.Severity == "HIGH" or .Severity == "CRITICAL")
+            | "* \(.VulnerabilityID) - \(.PkgName) (\(.Severity))"
+          ' tmp/trivy-report.json > .security-alert.log || true
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add .security-alert.log
-          git commit -m "chore: security alert log"
+          git add -f .security-alert.log || true
+          git commit -m "chore: trivy security alert log" || true
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           commit-message: "chore: high/critical vulnerabilities detected 🚨"
-          title: "chore: high/critical security scan triggered PR"
-          body: |
-            High or critical vulnerabilities were detected by Trivy.
-            This PR was automatically created to flag and track resolution.
+          title: "chore: auto PR for Trivy scan (high/critical vulnerabilities)"
+          body-path: tmp/pr-body.md
           branch: "auto/high-critical-security-scan"
           base: "master"
+          # delete-branch: true
+
