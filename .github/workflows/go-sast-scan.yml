@@ -99,6 +99,7 @@ jobs:
     dependencies-scan:
         name: Trivy Scan
         runs-on: ubuntu-latest
+        continue-on-error: true
         outputs:
             trivy-high-found: ${{ steps.check.outputs.trivy-high-found }}
 
@@ -134,7 +135,6 @@ jobs:
             run: |
                 echo "❌ High/Critical vulnerabilities found. Failing the job."
                 exit 1
-            continue-on-error: true
 
     auto-pr:
         name: Create Pull Request if High/Critical Vulnerabilities Found
