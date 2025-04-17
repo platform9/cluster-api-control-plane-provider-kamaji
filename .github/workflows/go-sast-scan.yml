@@ -129,6 +129,12 @@ jobs:
                 count=$(jq '[.Results[].Vulnerabilities[] | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-report.json)
                 echo "trivy-high-found=$([[ $count -gt 0 ]] && echo true || echo false)" >> $GITHUB_OUTPUT
 
+        -   name: Fail if High/Critical Vulnerabilities Found
+            if: steps.check.outputs.trivy-high-found == 'true'
+            run: |
+                echo "❌ High/Critical vulnerabilities found. Failing the job."
+                exit 1
+
     auto-pr:
         name: Create Pull Request if High/Critical Vulnerabilities Found
         needs: [dependencies-scan]
@@ -187,7 +193,7 @@ jobs:
             uses: peter-evans/create-pull-request@v5
             with:
                 commit-message: "chore: high/critical vulnerabilities detected 🚨"
-                title: "chore: auto PR for Trivy scan (high/critical vulnerabilities)"
+                title: "chore: Auto PR for the Trivy scan(high/critical)"
                 body-path: tmp/pr-body.md
                 branch: "auto/high-critical-security-scan"
                 base: "master"
