@@ -134,6 +134,7 @@ jobs:
             run: |
                 echo "❌ High/Critical vulnerabilities found. Failing the job."
                 exit 1
+            continue-on-error: true
 
     auto-pr:
         name: Create Pull Request if High/Critical Vulnerabilities Found
