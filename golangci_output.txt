@@ -1,0 +1,8 @@
+controllers/kamajicontrolplane_controller.go:155:10: ST1005: error strings should not be capitalized (staticcheck)
+			err = fmt.Errorf("Control Plane Endpoint is not yet available since unprocessed by Kamaji") //nolint:goerr113,stylecheck
+			      ^
+pkg/indexers/kamaji_uid.go:30:30: QF1008: could remove embedded field "ObjectMeta" from selector (staticcheck)
+		return []string{string(kcp.ObjectMeta.UID)}
+		                           ^
+2 issues:
+* staticcheck: 2
